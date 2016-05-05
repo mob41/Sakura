@@ -31,8 +31,8 @@ public class PluginManager {
 	}
 	
 	
-	public Object runPluginLifeCycle(String pluginUid, Object data){
-		Plugin plug = getPlugin(pluginUid);
+	public Object runPluginLifeCycle(String pluginName, Object data){
+		Plugin plug = getPlugin(pluginName);
 		plug.onCallPlugin();
 		plug.onPluginReceiveData(data);
 		Object object = plug.onPluginSendData();
@@ -42,50 +42,55 @@ public class PluginManager {
 	
 	/**
 	 * Call the plugin
-	 * @param pluginUid A plugin's UID
+	 * @param pluginUid A plugin's name
 	 */
-	public void callPlugin(String pluginUid){
-		getPlugin(pluginUid).onCallPlugin();
+	public void callPlugin(String pluginName){
+		getPlugin(pluginName).onCallPlugin();
 	}
 	/**
 	 * End the plugin
-	 * @param pluginUid A plugin's UID
+	 * @param pluginUid A plugin's name
 	 */
-	public void endPlugin(String pluginUid){
-		getPlugin(pluginUid).onEndPlugin();
+	public void endPlugin(String pluginName){
+		getPlugin(pluginName).onEndPlugin();
 	}
 	
 	/**
 	 * Send (raw) data to the plugin
-	 * @param pluginUid A plugin's UID
+	 * @param pluginUid A plugin's name
 	 * @param data The (raw) data. Can be <code>null</code> or <code>JSONObject</code>
 	 */
-	public void sendDataToPlugin(String pluginUid, Object data){
-		getPlugin(pluginUid).onPluginReceiveData(data);
+	public void sendDataToPlugin(String pluginName, Object data){
+		getPlugin(pluginName).onPluginReceiveData(data);
 	}
 	
 	/**
 	 * Receive (raw) data from the plugin
-	 * @param pluginUid A plugin's UID
+	 * @param pluginUid A plugin's name
 	 * @return The (raw) data. Can be <code>null</code> or <code>JSONObject</code>
 	 */
-	public Object receiveDataFromPlugin(String pluginUid){
-		return getPlugin(pluginUid).onPluginSendData();
+	public Object receiveDataFromPlugin(String pluginName){
+		return getPlugin(pluginName).onPluginSendData();
 	}
 	
 	/**
-	 * Get the <code>Plugin</code> instance with the plugin UID
-	 * @param pluginUid A plugin's UID
+	 * Get the <code>Plugin</code> instance with the plugin name
+	 * @param pluginUid A plugin's name
 	 * @return The <code>Plugin</code> instance.
 	 */
-	public Plugin getPlugin(String pluginUid){
-		int index = getIndexOfPlugin(pluginUid);
+	public Plugin getPlugin(String pluginName){
+		int index = getIndexOfPlugin(pluginName);
 		if (index == -1){
 			return null;
 		}
 		return plugins.get(index);
 	}
 	
+	/**
+	 * Add a plugin to the manager, with a plugin description (spec)
+	 * @param plugin A plugin instance
+	 * @param pluginDesc Plugin description in JSON
+	 */
 	public void addPlugin(Plugin plugin, JSONObject pluginDesc){
 		plugin.pluginUid = AES.getRandomByte();
 		plugin.pluginName = pluginDesc.getString("name");
@@ -94,13 +99,13 @@ public class PluginManager {
 	}
 	
 	/**
-	 * Get the index of the <code>Plugin</code> instance in the list with the plugin UID
-	 * @param pluginUid A plugin's UID
+	 * Get the index of the <code>Plugin</code> instance in the list with the plugin name
+	 * @param pluginUid A plugin's name
 	 * @return The <code>Plugin</code> instance's index in the list
 	 */
-	public int getIndexOfPlugin(String pluginUid){
+	public int getIndexOfPlugin(String pluginName){
 		for (int i = 0; i < plugins.size(); i++){
-			if (plugins.get(i).pluginUid.equals(pluginUid)){
+			if (plugins.get(i).pluginName.equals(pluginName)){
 				return i;
 			}
 		}
