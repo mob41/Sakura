@@ -13,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
 import com.mob41.sakura.hash.AES_SHA512;
-import com.mob41.sakura.servlets.old.HashKey;
 
 /***
  * <h1>Login Authentication System (Module)</h1>

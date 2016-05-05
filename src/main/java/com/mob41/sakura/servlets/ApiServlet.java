@@ -24,12 +24,11 @@ import com.mob41.sakura.remo.BLRemote;
 import com.mob41.sakura.remo.RMBridgeAPI;
 import com.mob41.sakura.scene.SceneSave;
 import com.mob41.sakura.scene.SceneThread;
-import com.mob41.sakura.servlets.old.ControlServlet;
 
 @WebServlet("/api")
 public class ApiServlet extends HttpServlet {
 	
-	private static final Logger logger = LogManager.getLogger(ControlServlet.class.getName());
+	private static final Logger logger = LogManager.getLogger("API");
 	private static final long serialVersionUID = 1L;
 	private static final String invalidResponse = 
 			"<!doctype html public \"-//w3c//dtd html 4.0 " +

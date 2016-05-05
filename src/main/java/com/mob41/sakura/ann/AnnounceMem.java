@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import com.mob41.sakura.servlets.old.ClassBridge;
+import com.mob41.sakura.hash.AES;
 
 public class AnnounceMem {
 	
@@ -37,7 +37,7 @@ public class AnnounceMem {
 	public static String addAnnounce(String announcename, String type, String title, String message, int level, int timeout){
 		Calendar cal = Calendar.getInstance();
 		cal.setTimeInMillis(cal.getTimeInMillis() + timeout);
-		String uid = ClassBridge.getRandomSalt();
+		String uid = AES.getRandomByte();
 		String[] data = new String[]{announcename, uid, type, title, message, Integer.toString(level), Long.toString(cal.getTimeInMillis())};
 		return announces.add(data) ? uid : null;
 	}
