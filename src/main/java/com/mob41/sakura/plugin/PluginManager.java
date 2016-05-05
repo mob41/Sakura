@@ -3,7 +3,13 @@ package com.mob41.sakura.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONObject;
+
+import com.mob41.sakura.hash.AES;
+
 public class PluginManager {
+	
+	private static final PluginManager pluginManager = new PluginManager();
 	
 	/**
 	 * The default maximum plugins amount
@@ -23,6 +29,7 @@ public class PluginManager {
 	public PluginManager(){
 		plugins = new ArrayList<Plugin>(MAX_PLUGINS);
 	}
+	
 	
 	public Object runPluginLifeCycle(String pluginUid, Object data){
 		Plugin plug = getPlugin(pluginUid);
@@ -79,6 +86,13 @@ public class PluginManager {
 		return plugins.get(index);
 	}
 	
+	public void addPlugin(Plugin plugin, JSONObject pluginDesc){
+		plugin.pluginUid = AES.getRandomByte();
+		plugin.pluginName = pluginDesc.getString("name");
+		plugin.pluginVer = pluginDesc.getString("version");
+		plugins.add(plugin);
+	}
+	
 	/**
 	 * Get the index of the <code>Plugin</code> instance in the list with the plugin UID
 	 * @param pluginUid A plugin's UID
@@ -91,6 +105,14 @@ public class PluginManager {
 			}
 		}
 		return -1;
+	}
+	
+	/**
+	 * Returns the currently running plugin manager.
+	 * @return PluginManager
+	 */
+	public static PluginManager getPluginManager(){
+		return pluginManager;
 	}
 	
 	

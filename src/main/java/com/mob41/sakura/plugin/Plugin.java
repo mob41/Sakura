@@ -15,6 +15,16 @@ public abstract class Plugin {
 	public String pluginUid;
 	
 	/**
+	 * The Name of this plugin
+	 */
+	public String pluginName;
+	
+	/**
+	 * The Version of this plugin
+	 */
+	public String pluginVer;
+	
+	/**
 	 * It is called when this plugin is called by the API
 	 */
 	public abstract void onCallPlugin();
