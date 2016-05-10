@@ -1,7 +1,5 @@
 package com.mob41.sakura.plugin;
 
-import com.mob41.sakura.scene.SceneSave;
-
 /**
  * An interface to implement a plugin for the Sakura API
  * @author Anthony
