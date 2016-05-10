@@ -31,7 +31,7 @@ public class PluginClassLoader extends URLClassLoader {
             try {
                 pluginClass = jarClass.asSubclass(Plugin.class);
             } catch (ClassCastException ex) {
-                throw new InvalidPluginException("main class `" + desc.getMainClass() + "' does not extend JavaPlugin", ex);
+                throw new InvalidPluginException("main class `" + desc.getMainClass() + "' does not extend Plugin", ex);
             }
 
             plugin = pluginClass.newInstance();
