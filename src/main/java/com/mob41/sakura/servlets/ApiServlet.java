@@ -52,6 +52,12 @@ public class ApiServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		
+		boolean alive = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
+		if (!alive){
+			return;
+		}
+		
 		response.addHeader("Access-Control-Allow-Origin", "*");
 		response.addHeader("Access-Control-Allow-Methods", "POST");
 		response.setStatus(200);
@@ -143,6 +149,12 @@ public class ApiServlet extends HttpServlet {
 			responseData.put("status", 1);
 			break;
 		case 1: //Access to plugins
+			
+			alive = PluginManager.getPluginManager().callAll_AccessPlugins(request, response);
+			if (!alive){
+				return;
+			}
+			
 			String pluginUid = request.getParameter("name");
 			JSONObject revData = new JSONObject(request.getParameter("plugin"));
 			try {
@@ -153,6 +165,9 @@ public class ApiServlet extends HttpServlet {
 				responseData.put("code", "no-such-plugin");
 				responseData.put("status", -1);
 			}
+			
+			PluginManager.getPluginManager().callAll_AfterAccessPlugins(request, response);
+			
 			break;
 		default: //Unknown Action
 			responseData.put("response", "Unknown action");
@@ -169,6 +184,8 @@ public class ApiServlet extends HttpServlet {
 		AccessTokenSession.getRunnable().getCurrentSessions().remove(tokenIndex);
 		json.put("data", en);
 		response.getWriter().println(json);
+		
+		PluginManager.getPluginManager().callAll_ClientDisconnectAPI(request, response);
 	}
 	
 	private static String encryptData(String data, String pass, String iv, String salt){

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.json.JSONObject;
 
 import com.mob41.sakura.hash.AES;
@@ -103,27 +106,31 @@ public class PluginManager {
 
 //Events call all
 	
-	public void callAll_AccessPlugins(){
+	public boolean callAll_AccessPlugins(HttpServletRequest request, HttpServletResponse response){
+		boolean alive = true;
 		for (int i = 0; i < plugins.size(); i++){
-			plugins.get(i).onAccessPlugins();
+			alive = plugins.get(i).onAccessPlugins(request, response);
+		}
+		return alive;
+	}
+	
+	public void callAll_AfterAccessPlugins(HttpServletRequest request, HttpServletResponse response){
+		for (int i = 0; i < plugins.size(); i++){
+			plugins.get(i).onAfterAccessPlugins(request, response);
 		}
 	}
 	
-	public void callAll_AfterAccessPlugins(){
+	public boolean callAll_ClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
+		boolean alive = true;
 		for (int i = 0; i < plugins.size(); i++){
-			plugins.get(i).onAfterAccessPlugins();
+			alive = plugins.get(i).onClientConnectAPI(request, response);
 		}
+		return alive;
 	}
 	
-	public void callAll_ClientConnectAPI(){
+	public void callAll_ClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response){
 		for (int i = 0; i < plugins.size(); i++){
-			plugins.get(i).onClientConnectAPI();
-		}
-	}
-	
-	public void callAll_ClientDisconnectAPI(){
-		for (int i = 0; i < plugins.size(); i++){
-			plugins.get(i).onClientDisconnectAPI();
+			plugins.get(i).onClientDisconnectAPI(request, response);
 		}
 	}
 	

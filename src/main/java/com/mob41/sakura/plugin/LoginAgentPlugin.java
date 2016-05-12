@@ -1,5 +1,8 @@
 package com.mob41.sakura.plugin;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 public class LoginAgentPlugin extends Plugin{
 
 	@Override
@@ -27,7 +30,8 @@ public class LoginAgentPlugin extends Plugin{
 	}
 	
 	@Override
-	public void onAccessPlugins(){
+	public boolean onAccessPlugins(HttpServletRequest request, HttpServletResponse response){
+		return true;
 		
 	}
 

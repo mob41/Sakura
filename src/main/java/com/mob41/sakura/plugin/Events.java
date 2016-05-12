@@ -1,5 +1,8 @@
 package com.mob41.sakura.plugin;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  * <code>Events</code> class to control events in plugins<br>
  * <br>
@@ -12,26 +15,40 @@ public abstract class Events {
 	/**
 	 * This will be called whenever the API is connected to a client.<br>
 	 * Override this method to function
+	 * 
+	 * @return Return whether the connection should be alive
 	 */
-	public void onClientConnectAPI() {};
+	public boolean onClientConnectAPI(HttpServletRequest request, HttpServletResponse response) {
+		return true;
+	};
 	
 	/**
 	 * This will be called whenever the API is disconnected from the client.<br>
-	 * Override this method to function
+	 * Override this method to function<br>
+	 * <br>
+	 * It is not allowed to kill connection after the API is disconnected.
 	 */
-	public void onClientDisconnectAPI() {};
+	public boolean onClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) {
+		return true;
+	};
 	
 	/**
 	 * This will be called whenever the client is trying to access plugins.<br>
 	 * Override this method to function<br>
 	 * <br>
 	 * <b>Note:</b> Built-in plugins like <code>LoginAgentPlugin</code> is always the highest priority.
+	 * 
+	 * @return Return whether the connection should be alive
 	 */
-	public void onAccessPlugins() {};
+	public boolean onAccessPlugins(HttpServletRequest request, HttpServletResponse response) {
+		return true;
+	};
 	
 	/**
 	 * This will be called whenever after the client accesses plugins.<br>
-	 * Override this method to function
+	 * Override this method to function<br>
+	 * <br>
+	 * It is not allowed to kill connection after accessing plugin.
 	 */
-	public void onAfterAccessPlugins() {};
+	public void onAfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) {};
 }
