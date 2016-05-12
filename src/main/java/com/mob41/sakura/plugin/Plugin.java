@@ -1,12 +1,13 @@
 package com.mob41.sakura.plugin;
 
 /**
- * An interface to implement a plugin for the Sakura API
+ * An API to port plugins into Sakura system
  * @author Anthony
  *
  */
-public abstract class Plugin {
+public abstract class Plugin extends Events{
 	
+
 	/**
 	 * The Unique ID of this plugin
 	 */
@@ -15,12 +16,7 @@ public abstract class Plugin {
 	/**
 	 * The Name of this plugin
 	 */
-	public String pluginName;
-	
-	/**
-	 * The Version of this plugin
-	 */
-	public String pluginVer;
+	public PluginDescription pluginDesc;
 	
 	/**
 	 * It is called when this plugin is called by the API
@@ -43,5 +39,6 @@ public abstract class Plugin {
 	 * It is called when this plugin is being ended.<br>
 	 */
 	public abstract void onEndPlugin();
+	
 	
 }

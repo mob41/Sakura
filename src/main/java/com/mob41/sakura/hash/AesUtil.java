@@ -1,4 +1,4 @@
-package com.mob41.sakura;
+package com.mob41.sakura.hash;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;

@@ -16,9 +16,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mob41.sakura.AesUtil;
 import com.mob41.sakura.Conf;
 import com.mob41.sakura.hash.AES;
+import com.mob41.sakura.hash.AesUtil;
 import com.mob41.sakura.plugin.PluginManager;
 import com.mob41.sakura.plugin.exception.NoSuchPluginException;
 import com.mob41.sakura.remo.BLRemote;
@@ -142,14 +142,16 @@ public class ApiServlet extends HttpServlet {
 			responseData.put("response", "OK");
 			responseData.put("status", 1);
 			break;
-// Info
 		case 1: //Access to plugins
 			String pluginUid = request.getParameter("name");
 			JSONObject revData = new JSONObject(request.getParameter("plugin"));
 			try {
 				responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
 			} catch (NoSuchPluginException e) {
-				e.printStackTrace();
+				System.out.println("The plugin requested wasn't exist");
+				responseData.put("response", e);
+				responseData.put("code", "no-such-plugin");
+				responseData.put("status", -1);
 			}
 			break;
 		default: //Unknown Action

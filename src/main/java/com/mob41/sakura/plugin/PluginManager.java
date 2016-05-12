@@ -58,9 +58,11 @@ public class PluginManager {
 		plug.onCallPlugin();
 		plug.onPluginReceiveData(data);
 		Object object = plug.onPluginSendData();
-		((Plugin) plug).onEndPlugin();
+		plug.onEndPlugin();
 		return object;
 	}
+	
+//Life-cycle
 	
 	/**
 	 * Call the plugin
@@ -98,6 +100,32 @@ public class PluginManager {
 	public Object receiveDataFromPlugin(String pluginName) throws NoSuchPluginException{
 		return getPlugin(pluginName).onPluginSendData();
 	}
+
+//Events call all
+	
+	public void callAll_AccessPlugins(){
+		for (int i = 0; i < plugins.size(); i++){
+			plugins.get(i).onAccessPlugins();
+		}
+	}
+	
+	public void callAll_AfterAccessPlugins(){
+		for (int i = 0; i < plugins.size(); i++){
+			plugins.get(i).onAfterAccessPlugins();
+		}
+	}
+	
+	public void callAll_ClientConnectAPI(){
+		for (int i = 0; i < plugins.size(); i++){
+			plugins.get(i).onClientConnectAPI();
+		}
+	}
+	
+	public void callAll_ClientDisconnectAPI(){
+		for (int i = 0; i < plugins.size(); i++){
+			plugins.get(i).onClientDisconnectAPI();
+		}
+	}
 	
 	/**
 	 * Get the <code>Plugin</code> instance with the plugin name
@@ -119,10 +147,8 @@ public class PluginManager {
 	 * @param pluginDesc Plugin description in JSON
 	 */
 	public void addPlugin(Plugin plugin, PluginDescription desc){
-		JSONObject pluginDesc = desc.getRawJSON();
 		plugin.pluginUid = AES.getRandomByte();
-		plugin.pluginName = pluginDesc.getString("name");
-		plugin.pluginVer = pluginDesc.getString("version");
+		plugin.pluginDesc = desc;
 		plugins.add(plugin);
 	}
 	
@@ -133,7 +159,7 @@ public class PluginManager {
 	 */
 	public int getIndexOfPlugin(String pluginName){
 		for (int i = 0; i < plugins.size(); i++){
-			if (plugins.get(i).pluginName.equals(pluginName)){
+			if (plugins.get(i).pluginDesc.getName().equals(pluginName)){
 				return i;
 			}
 		}
