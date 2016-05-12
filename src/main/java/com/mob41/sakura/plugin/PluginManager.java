@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import com.mob41.sakura.hash.AES;
 import com.mob41.sakura.plugin.exception.InvalidPluginDescription;
 import com.mob41.sakura.plugin.exception.InvalidPluginException;
+import com.mob41.sakura.plugin.exception.NoSuchPluginException;
 
 public class PluginManager {
 	
@@ -30,7 +31,7 @@ public class PluginManager {
 	/**
 	 * List of plugins
 	 */
-	private List<Object> plugins;
+	private List<Plugin> plugins;
 
 	/**
 	 * Create a new <code>PluginManager</code> instance.<br>
@@ -38,15 +39,25 @@ public class PluginManager {
 	 * It stores instances of <code>Plugin</code> or its inherits.
 	 */
 	public PluginManager(){
-		plugins = new ArrayList<Object>(MAX_PLUGINS);
+		plugins = new ArrayList<Plugin>(MAX_PLUGINS);
 	}
 	
-	
-	public Object runPluginLifeCycle(String pluginName, Object data){
-		Object plug = getPlugin(pluginName);
-		((Plugin) plug).onCallPlugin();
-		((Plugin) plug).onPluginReceiveData(data);
-		Object object = ((Plugin) plug).onPluginSendData();
+	/**
+	 * Runs the whole plugin life cycle.<br>
+	 * 1. Call<br>
+	 * 2. Send Data<br>
+	 * 3. Receive Data<br>
+	 * 4. End<br>
+	 * @param pluginName The plugin's name
+	 * @param data The data to be sent to the plugin. Refer to the plugin's documentation
+	 * @return The data received from the plugin
+	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
+	 */
+	public Object runPluginLifeCycle(String pluginName, Object data) throws NoSuchPluginException{
+		Plugin plug = getPlugin(pluginName);
+		plug.onCallPlugin();
+		plug.onPluginReceiveData(data);
+		Object object = plug.onPluginSendData();
 		((Plugin) plug).onEndPlugin();
 		return object;
 	}
@@ -54,45 +65,50 @@ public class PluginManager {
 	/**
 	 * Call the plugin
 	 * @param pluginUid A plugin's name
+	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public void callPlugin(String pluginName){
-		((Plugin) getPlugin(pluginName)).onCallPlugin();
+	public void callPlugin(String pluginName) throws NoSuchPluginException{
+		getPlugin(pluginName).onCallPlugin();
 	}
 	/**
 	 * End the plugin
 	 * @param pluginUid A plugin's name
+	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public void endPlugin(String pluginName){
-		((Plugin) getPlugin(pluginName)).onEndPlugin();
+	public void endPlugin(String pluginName) throws NoSuchPluginException{
+		getPlugin(pluginName).onEndPlugin();
 	}
 	
 	/**
 	 * Send (raw) data to the plugin
 	 * @param pluginUid A plugin's name
 	 * @param data The (raw) data. Can be <code>null</code> or <code>JSONObject</code>
+	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public void sendDataToPlugin(String pluginName, Object data){
-		((Plugin) getPlugin(pluginName)).onPluginReceiveData(data);
+	public void sendDataToPlugin(String pluginName, Object data) throws NoSuchPluginException{
+		getPlugin(pluginName).onPluginReceiveData(data);
 	}
 	
 	/**
 	 * Receive (raw) data from the plugin
 	 * @param pluginUid A plugin's name
 	 * @return The (raw) data. Can be <code>null</code> or <code>JSONObject</code>
+	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public Object receiveDataFromPlugin(String pluginName){
-		return ((Plugin) getPlugin(pluginName)).onPluginSendData();
+	public Object receiveDataFromPlugin(String pluginName) throws NoSuchPluginException{
+		return getPlugin(pluginName).onPluginSendData();
 	}
 	
 	/**
 	 * Get the <code>Plugin</code> instance with the plugin name
 	 * @param pluginUid A plugin's name
 	 * @return The <code>Plugin</code> instance.
+	 * @exception NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public Object getPlugin(String pluginName){
+	public Plugin getPlugin(String pluginName) throws NoSuchPluginException{
 		int index = getIndexOfPlugin(pluginName);
 		if (index == -1){
-			return null;
+			throw new NoSuchPluginException("The plugin \"" + pluginName + "\" wasn't loaded/found");
 		}
 		return plugins.get(index);
 	}
@@ -117,7 +133,7 @@ public class PluginManager {
 	 */
 	public int getIndexOfPlugin(String pluginName){
 		for (int i = 0; i < plugins.size(); i++){
-			if (((Plugin) plugins.get(i)).pluginName.equals(pluginName)){
+			if (plugins.get(i).pluginName.equals(pluginName)){
 				return i;
 			}
 		}
@@ -141,6 +157,7 @@ public class PluginManager {
 		for (File file : files){
 			if (!file.getName().substring(file.getName().length() - 4).equals(".jar")){
 				System.err.println("WARNING: Non-plugin files are in the plugins folder, which is not recommended.");
+				continue;
 			}
 			loadPlugin(file);
 		}
@@ -173,7 +190,7 @@ public class PluginManager {
 
         final PluginClassLoader loader;
         try {
-            loader = new PluginClassLoader(description, System.class.getClassLoader(), file);
+            loader = new PluginClassLoader(description, PluginManager.class.getClassLoader(), file);
         } catch (InvalidPluginException ex) {
             throw ex;
         } catch (Throwable ex) {
@@ -181,12 +198,6 @@ public class PluginManager {
         }
 
         addPlugin(loader.getPlugin(), description);
-
-        try {
-			loader.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
         
         return loader.getPlugin();
     }

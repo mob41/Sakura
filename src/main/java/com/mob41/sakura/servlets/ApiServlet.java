@@ -20,6 +20,7 @@ import com.mob41.sakura.AesUtil;
 import com.mob41.sakura.Conf;
 import com.mob41.sakura.hash.AES;
 import com.mob41.sakura.plugin.PluginManager;
+import com.mob41.sakura.plugin.exception.NoSuchPluginException;
 import com.mob41.sakura.remo.BLRemote;
 import com.mob41.sakura.remo.RMBridgeAPI;
 import com.mob41.sakura.scene.SceneSave;
@@ -145,7 +146,11 @@ public class ApiServlet extends HttpServlet {
 		case 1: //Access to plugins
 			String pluginUid = request.getParameter("name");
 			JSONObject revData = new JSONObject(request.getParameter("plugin"));
-			responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
+			try {
+				responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
+			} catch (NoSuchPluginException e) {
+				e.printStackTrace();
+			}
 			break;
 		default: //Unknown Action
 			responseData.put("response", "Unknown action");

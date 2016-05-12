@@ -26,14 +26,12 @@ public class PluginClassLoader extends URLClassLoader {
             } catch (ClassNotFoundException ex) {
                 throw new InvalidPluginException("Cannot find main class `" + desc.getMainClass() + "'", ex);
             }
-
             Class<? extends Plugin> pluginClass;
             try {
                 pluginClass = jarClass.asSubclass(Plugin.class);
             } catch (ClassCastException ex) {
                 throw new InvalidPluginException("main class `" + desc.getMainClass() + "' does not extend Plugin", ex);
             }
-
             plugin = pluginClass.newInstance();
         } catch (IllegalAccessException ex) {
             throw new InvalidPluginException("No public constructor", ex);
@@ -47,7 +45,7 @@ public class PluginClassLoader extends URLClassLoader {
 	 * @return The Plugin loaded
 	 */
 	public Plugin getPlugin(){
-		return this.plugin;
+		return plugin;
 	}
 	
 	/**
