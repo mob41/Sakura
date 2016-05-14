@@ -1,18 +1,24 @@
 package com.mob41.sakura.plugin.loginagent;
 
+import java.net.InetAddress;
+import java.util.Calendar;
+import java.util.Date;
+
+import org.json.JSONObject;
+
 import com.mob41.sakura.hash.AesUtil;
 
 public class Session {
 
-	private final String user;
+	private final User user;
 	
-	private final String ip;
+	private final InetAddress ip;
 	
 	private final String sessionkey;
 	
 	private final long regtime;
 	
-	private final long timeout;
+	private final int timeout;
 	
 	/**
 	 * Creates a new session.
@@ -21,13 +27,74 @@ public class Session {
 	 * @param regtime Register Time In MS
 	 * @param timeout Timeout In MS
 	 */
-	public Session(String user, String ip, long regtime, long timeout){
+	public Session(User user, InetAddress ip, long regtime, int timeout){
 		this.user = user;
 		this.ip = ip;
 		this.regtime = regtime;
 		this.timeout = timeout;
 		
 		this.sessionkey = AesUtil.random(128/8);
+	}
+	
+	/**
+	 * Returns the user from this session
+	 * @return ```User``` instance
+	 */
+	public User getUser(){
+		return user;
+	}
+	
+	/**
+	 * Returns the Internet IP Address from this session
+	 * @return ```InetAddress``` instance
+	 */
+	public InetAddress getIP(){
+		return ip;
+	}
+	
+	/**
+	 * Returns the register time in ms
+	 * @return The register time
+	 */
+	public long getRegisterTime(){
+		return regtime;
+	}
+	
+	/**
+	 * Returns the timeout in ms
+	 * @return The timeout
+	 */
+	public long getTimeout(){
+		return timeout;
+	}
+	
+	/**
+	 * Returns the session key
+	 * @return The session key
+	 */
+	public String getSessionKey(){
+		return sessionkey;
+	}
+	
+	/**
+	 * Returns whether this session is valid or not, by:<br>
+	 * <br>
+	 * - Checking Timed out
+	 * @return whether is it valid or not
+	 */
+	public boolean isValid(){
+		Calendar cal = Calendar.getInstance();
+		Calendar regcal = Calendar.getInstance();
+		Calendar endcal = Calendar.getInstance();
+		Date regdate;
+		
+		regdate = new Date(regtime);
+		regcal.setTime(regdate);
+		endcal.setTime(regdate);
+		
+		endcal.add(Calendar.MILLISECOND, timeout);
+		
+		return !(cal.before(endcal) && cal.after(regcal));
 	}
 	
 	/**

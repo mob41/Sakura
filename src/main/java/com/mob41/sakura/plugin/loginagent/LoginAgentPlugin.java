@@ -1,21 +1,30 @@
 package com.mob41.sakura.plugin.loginagent;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
+import com.mob41.sakura.plugin.Disconnection;
 import com.mob41.sakura.plugin.Plugin;
+import com.mob41.sakura.plugin.PluginDescription;
 
 public class LoginAgentPlugin extends Plugin{
 	
+	private final SessionHandler sessionHandler;
+	
+	private final LoginHandler loginHandler;
+	
 	private JSONObject jsonData;
 	
-	public LoginAgentPlugin(){
-		System.out.println("Created");
+	public LoginAgentPlugin(PluginDescription pluginDesc) throws Exception{
+		super(pluginDesc);
+		sessionHandler = new SessionHandler(30);
+		loginHandler = new LoginHandler(this, 30);
 	}
 
 	@Override
@@ -49,36 +58,78 @@ public class LoginAgentPlugin extends Plugin{
 	}
 	
 	@Override
-	public boolean onAccessPlugins(HttpServletRequest request, HttpServletResponse response){
+	public Disconnection onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONObject json = new JSONObject();
+		json.put("generated", Calendar.getInstance().getTimeInMillis());
+		
+		if (request.getParameter("name") != null && request.getParameter("name").equals("login")){
+			String username = request.getParameter("user");
+			String password = request.getParameter("pwd");
+			if (username == null || password == null){
+				json.put("code", "must-not-blank");
+				json.put("response", "Must not be blank");
+				json.put("status", -1);
+				response.getWriter().println(json);
+				return Disconnection.IMMEDIATE_DISCONNECT;
+			}
+			
+			boolean auth = loginHandler.authenticate(username, password);
+			
+			if (auth){
+				User user = loginHandler.getUserByUsername(username);
+				String sessionkey = sessionHandler.newSession(user, InetAddress.getByName(request.getRemoteAddr()));
+				if (sessionkey == null){
+					json.put("code", "same-ip-user");
+					json.put("response", "Could not register session on same IP or user");
+					json.put("status", -1);
+					response.getWriter().println(json);
+					return Disconnection.IMMEDIATE_DISCONNECT;
+				}
+				
+				json.put("sessionkey", sessionkey);
+				json.put("code", "login-success");
+				json.put("response", "Logged in successfully");
+				json.put("status", 1);
+				response.getWriter().println(json);
+				return Disconnection.SKIP_TO_ENCRYPTION;
+			} else {
+				json.put("code", "login-failed");
+				json.put("response", "Wrong password or user does not exist");
+				json.put("status", -1);
+				response.getWriter().println(json);
+				return Disconnection.SKIP_TO_ENCRYPTION;
+			}
+		}
+		
 		String sessionkey = request.getParameter("sessionkey");
 		
-		System.err.println("LoginAgent: Reject!");
-		JSONObject json = new JSONObject();
-		json.put("status", -1);
-		json.put("response", "Your request is rejected");
-		try {
+		if (sessionkey == null){
+			json.put("status", -1);
+			json.put("code", "no-session-key");
+			json.put("response", "No session key is specified");
+			System.err.println("No session key specified");
 			response.getWriter().println(json);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return Disconnection.IMMEDIATE_DISCONNECT;
 		}
-		return false;
+		
+		if (!sessionHandler.isSessionValid(sessionkey)){
+			json.put("status", -1);
+			json.put("code", "invalid-session-key");
+			json.put("response", "Session key is invalid");
+			System.err.println("Session key is invalid");
+			response.getWriter().println(json);
+			return Disconnection.IMMEDIATE_DISCONNECT;
+		}
+		
+		System.out.println("LoginAgentPlugin: Access granted from " + request.getRemoteAddr());
+
+		return Disconnection.CONTINUE;
 		
 	}
 	
 	@Override
-	public boolean onClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
-		System.err.println("LoginAgent: Reject connection!");
-		JSONObject json = new JSONObject();
-		json.put("status", -1);
-		json.put("response", "Your request is rejected");
-		try {
-			response.getWriter().println(json);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return false;
+	public Disconnection onClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
+		return Disconnection.CONTINUE;
 	}
 
 }

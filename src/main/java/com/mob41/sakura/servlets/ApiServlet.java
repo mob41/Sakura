@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import com.mob41.sakura.Conf;
 import com.mob41.sakura.hash.AES;
 import com.mob41.sakura.hash.AesUtil;
+import com.mob41.sakura.plugin.Disconnection;
 import com.mob41.sakura.plugin.PluginManager;
 import com.mob41.sakura.plugin.exception.NoSuchPluginException;
 import com.mob41.sakura.remo.BLRemote;
@@ -58,9 +59,13 @@ public class ApiServlet extends HttpServlet {
 		response.setStatus(200);
 		response.setContentType("application/json");
 		
-		boolean alive = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
-		if (!alive){
+		boolean doActions = true;
+		
+		Disconnection dc = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
+		if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT)){
 			return;
+		} else if (dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
+			doActions = false;
 		}
 		
 		JSONObject json = new JSONObject();
@@ -128,53 +133,63 @@ public class ApiServlet extends HttpServlet {
 			return;
 		}
 		String iv = request.getParameter("iv");
+		
+		JSONObject responseData = new JSONObject(); 
+		if (doActions){
 
-		//Read action
-		if (request.getParameter("action") == null){
-			response.setStatus(400);
-			response.getWriter().println(invalidResponse);
-			return;
-		}
-		if (!isInteger(request.getParameter("action"))){
-			response.setStatus(400);
-			response.getWriter().println(invalidResponse);
-			return;
-		}
-		int action = Integer.parseInt(request.getParameter("action"));
-		
-		JSONObject responseData = new JSONObject();
-		
-		switch (action){
-		case 0: //Check connection only
-			responseData.put("response", "OK");
-			responseData.put("status", 1);
-			break;
-		case 1: //Access to plugins
-			
-			alive = PluginManager.getPluginManager().callAll_AccessPlugins(request, response);
-			if (!alive){
+			//Read action
+			if (request.getParameter("action") == null){
+				response.setStatus(400);
+				response.getWriter().println(invalidResponse);
 				return;
 			}
+			if (!isInteger(request.getParameter("action"))){
+				response.setStatus(400);
+				response.getWriter().println(invalidResponse);
+				return;
+			}
+			int action = Integer.parseInt(request.getParameter("action"));
 			
-			String pluginUid = request.getParameter("name");
-			System.out.println("plugin: " + request.getParameter("plugin"));
-			JSONObject revData = new JSONObject(request.getParameter("plugin"));
-			System.out.println("plugJSON: " + revData);
-			try {
-				responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
-			} catch (NoSuchPluginException e) {
-				System.out.println("The plugin requested wasn't exist");
-				responseData.put("response", e);
-				responseData.put("code", "no-such-plugin");
+			switch (action){
+			case 0: //Check connection only
+				responseData.put("response", "OK");
+				responseData.put("status", 1);
+				break;
+			case 1: //Access to plugins
+				
+				boolean accessPlugins = true;
+				
+				dc = PluginManager.getPluginManager().callAll_AccessPlugins(request, response);
+				if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT)){
+					return;
+				} else if (dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
+					accessPlugins = false;;
+				}
+				
+				if (accessPlugins){
+					String pluginUid = request.getParameter("name");
+					System.out.println("plugin: " + request.getParameter("plugin"));
+					JSONObject revData = new JSONObject(request.getParameter("plugin"));
+					System.out.println("plugJSON: " + revData);
+					
+					
+					PluginManager.getPluginManager().callAll_AfterAccessPlugins(request, response);
+					
+					try {
+						responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
+					} catch (NoSuchPluginException e) {
+						System.out.println("The plugin requested wasn't exist");
+						responseData.put("response", e);
+						responseData.put("code", "no-such-plugin");
+						responseData.put("status", -1);
+					}
+				}
+				
+				break;
+			default: //Unknown Action
+				responseData.put("response", "Unknown action");
 				responseData.put("status", -1);
 			}
-			
-			PluginManager.getPluginManager().callAll_AfterAccessPlugins(request, response);
-			
-			break;
-		default: //Unknown Action
-			responseData.put("response", "Unknown action");
-			responseData.put("status", -1);
 		}
 		
 		//Send encrypted data
@@ -183,8 +198,12 @@ public class ApiServlet extends HttpServlet {
 				.get(tokenIndex).getString("pass");
 		String salt = AccessTokenSession.getRunnable().getCurrentSessions()
 				.get(tokenIndex).getString("salt");
-		String en = encryptData(responseData.toString(), pass, iv, salt);
 		AccessTokenSession.getRunnable().getCurrentSessions().remove(tokenIndex);
+		String en = encryptData(responseData.toString(), pass, iv, salt);
+
+		if (json.isNull("status")){
+			json.put("status", 1);
+		}
 		json.put("data", en);
 		response.getWriter().println(json);
 		

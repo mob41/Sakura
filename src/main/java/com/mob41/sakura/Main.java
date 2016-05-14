@@ -17,8 +17,9 @@ public class Main {
 		PluginManager.getPluginManager().loadAllPlugins();
 		AccessTokenSession.runThread(50);
 		
-		LoginAgentPlugin loginAgPlug = new LoginAgentPlugin();
 		PluginDescription desc = new PluginDescription("LoginAgent", "A login security system on Sakura", "SNAPSHOT", "mob41", "com.mob41.sakura.plugin.LoginAgentPlugin", "");
+		
+		LoginAgentPlugin loginAgPlug = new LoginAgentPlugin(desc);
 		PluginManager.getPluginManager().addPlugin(loginAgPlug, desc);
 		Jetty.start();
 	}

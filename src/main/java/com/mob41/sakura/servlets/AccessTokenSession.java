@@ -63,7 +63,7 @@ public class AccessTokenSession implements Runnable{
 	}
 	
 	public boolean addSession(String token, String encpass, String encsalt, String ip, Long regtime, int timeout){
-		if (getAmountOfThisIp(ip) >= 1){
+		if (getAmountOfThisIp(ip) >= 2){
 			return false;
 		}
 		JSONObject json = new JSONObject();

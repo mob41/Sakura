@@ -106,29 +106,37 @@ public class PluginManager {
 
 //Events call all
 	
-	public boolean callAll_AccessPlugins(HttpServletRequest request, HttpServletResponse response){
-		boolean alive = true;
+	public Disconnection callAll_AccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		Disconnection dc = Disconnection.CONTINUE;
 		for (int i = 0; i < plugins.size(); i++){
-			alive = plugins.get(i).onAccessPlugins(request, response);
+			dc = plugins.get(i).onAccessPlugins(request, response);
+			if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT) || 
+					dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
+				break;
+			}
 		}
-		return alive;
+		return dc;
 	}
 	
-	public void callAll_AfterAccessPlugins(HttpServletRequest request, HttpServletResponse response){
+	public void callAll_AfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
 		for (int i = 0; i < plugins.size(); i++){
 			plugins.get(i).onAfterAccessPlugins(request, response);
 		}
 	}
-	
-	public boolean callAll_ClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
-		boolean alive = true;
+
+	public Disconnection callAll_ClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		Disconnection dc = Disconnection.CONTINUE;
 		for (int i = 0; i < plugins.size(); i++){
-			alive = plugins.get(i).onClientConnectAPI(request, response);
+			dc = plugins.get(i).onClientConnectAPI(request, response);
+			if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT) || 
+					dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
+				break;
+			}
 		}
-		return alive;
+		return dc;
 	}
 	
-	public void callAll_ClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response){
+	public void callAll_ClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException{
 		for (int i = 0; i < plugins.size(); i++){
 			plugins.get(i).onClientDisconnectAPI(request, response);
 		}

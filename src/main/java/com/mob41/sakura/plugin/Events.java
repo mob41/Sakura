@@ -1,5 +1,7 @@
 package com.mob41.sakura.plugin;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -18,8 +20,8 @@ public abstract class Events {
 	 * 
 	 * @return Return whether the connection should be alive
 	 */
-	public boolean onClientConnectAPI(HttpServletRequest request, HttpServletResponse response) {
-		return true;
+	public Disconnection onClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return Disconnection.CONTINUE;
 	};
 	
 	/**
@@ -28,8 +30,8 @@ public abstract class Events {
 	 * <br>
 	 * It is not allowed to kill connection after the API is disconnected.
 	 */
-	public boolean onClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) {
-		return true;
+	public Disconnection onClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return Disconnection.CONTINUE;
 	};
 	
 	/**
@@ -40,8 +42,8 @@ public abstract class Events {
 	 * 
 	 * @return Return whether the connection should be alive
 	 */
-	public boolean onAccessPlugins(HttpServletRequest request, HttpServletResponse response) {
-		return true;
+	public Disconnection onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return Disconnection.CONTINUE;
 	};
 	
 	/**
@@ -50,5 +52,5 @@ public abstract class Events {
 	 * <br>
 	 * It is not allowed to kill connection after accessing plugin.
 	 */
-	public void onAfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) {};
+	public void onAfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException {};
 }

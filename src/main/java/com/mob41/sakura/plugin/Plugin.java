@@ -14,6 +14,10 @@ import java.io.IOException;
 public abstract class Plugin extends Events{
 	
 	private static final String workingDir = System.getProperty("user.dir");
+	
+	public Plugin(PluginDescription pluginDesc){
+		this.pluginDesc = pluginDesc;
+	}
 
 	/**
 	 * The Unique ID of this plugin
@@ -21,7 +25,7 @@ public abstract class Plugin extends Events{
 	public String pluginUid;
 	
 	/**
-	 * The Name of this plugin
+	 * The Description of this plugin
 	 */
 	public PluginDescription pluginDesc;
 	
@@ -48,15 +52,22 @@ public abstract class Plugin extends Events{
 	public abstract void onEndPlugin();
 	
 	/**
-	 * Get the <code>FileOutputStream</code> from the <code>pluginData/{pluginName}/{fileName}</code>
+	 * Get the <code>FileOutputStream</code> from the <code>pluginData/{pluginName}/{fileName}</code><br>
+	 * <br>
+	 * If the file does not exist, the file will be automatically created.<br>
+	 * If the folder does not exist, the folder will be automatically created.
 	 * @param fileName The filename to write into plugin data save
 	 * @return <code>FileOutputStream</code>, to write raw to it
 	 * @throws IOException If I/O goes wrong
 	 */
 	public final FileOutputStream getDataFileOutputStream(String fileName) throws IOException{
+		File folder = new File(workingDir + "\\pluginData\\" + pluginDesc.getName());
+		if (!folder.exists()){
+			folder.mkdirs();
+		}
+		
 		File file = new File(workingDir + "\\pluginData\\" + pluginDesc.getName() + "\\" + fileName);
 		if (!file.exists()){
-			file.mkdirs();
 			file.createNewFile();
 		}
 		
@@ -72,6 +83,7 @@ public abstract class Plugin extends Events{
 	 * @throws IOException If I/O goes wrong
 	 */
 	public final FileInputStream getDataFileInputStream(String fileName) throws IOException{
+		System.out.println(pluginDesc.getRawJSON());
 		File file = new File(workingDir + "\\pluginData\\" + pluginDesc.getName() + "\\" + fileName);
 		
 		if (!file.exists()){
