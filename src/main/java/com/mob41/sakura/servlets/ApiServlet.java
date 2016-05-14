@@ -52,16 +52,17 @@ public class ApiServlet extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		response.addHeader("Access-Control-Allow-Origin", "*");
+		response.addHeader("Access-Control-Allow-Methods", "POST");
+		
+		response.setStatus(200);
+		response.setContentType("application/json");
 		
 		boolean alive = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
 		if (!alive){
 			return;
 		}
 		
-		response.addHeader("Access-Control-Allow-Origin", "*");
-		response.addHeader("Access-Control-Allow-Methods", "POST");
-		response.setStatus(200);
-		response.setContentType("application/json");
 		JSONObject json = new JSONObject();
 		json.put("generated", Calendar.getInstance().getTimeInMillis());
 		
@@ -83,7 +84,7 @@ public class ApiServlet extends HttpServlet {
 			String salt = AesUtil.random(128/8);
 			String pass = AesUtil.random(128/8);
 			String iv = AesUtil.random(128/8);
-			token = AesUtil.random(128);
+			token = AesUtil.random(128/8);
 			boolean success = AccessTokenSession.getRunnable().addSession(token, pass, salt,
 					request.getRemoteAddr(), Calendar.getInstance().getTimeInMillis(),
 					AccessTokenSession.DEFAULT_TIMEOUT);
@@ -156,7 +157,9 @@ public class ApiServlet extends HttpServlet {
 			}
 			
 			String pluginUid = request.getParameter("name");
+			System.out.println("plugin: " + request.getParameter("plugin"));
 			JSONObject revData = new JSONObject(request.getParameter("plugin"));
+			System.out.println("plugJSON: " + revData);
 			try {
 				responseData = mergeJSON(responseData, (JSONObject) PluginManager.getPluginManager().runPluginLifeCycle(pluginUid, revData));
 			} catch (NoSuchPluginException e) {
@@ -201,6 +204,13 @@ public class ApiServlet extends HttpServlet {
 	}
 	
 	private static JSONObject mergeJSON(JSONObject Obj1, JSONObject Obj2){
+		System.out.println("obj1: " + Obj1);
+		System.out.println("Obj2: " + Obj2);
+		if (JSONObject.getNames(Obj1) == null){
+			return Obj2;
+		} else if (Obj2 == null){
+			return Obj1;
+		}
 		JSONObject merged = new JSONObject(Obj1, JSONObject.getNames(Obj1));
 		for(String key : JSONObject.getNames(Obj2))
 		{

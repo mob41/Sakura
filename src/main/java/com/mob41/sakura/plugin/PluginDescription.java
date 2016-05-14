@@ -48,6 +48,23 @@ public class PluginDescription{
 		}
 	}
 	
+	public PluginDescription(String name, String desc, String version, String author, String mainclass, String website) throws InvalidPluginDescription{
+		JSONObject json = new JSONObject();
+		json.put("name", name);
+		json.put("desc", desc);
+		json.put("version", version);
+		json.put("author", author);
+		json.put("mainclass", mainclass);
+		json.put("website", website);
+		this.rawJson = json;
+		this.name = name;
+		this.desc = desc;
+		this.version = version;
+		this.author = author;
+		this.mainclass = mainclass;
+		this.website = website;
+	}
+	
 	/**
 	 * Returns the plugin's name specified in the description
 	 * @return Plugin's name

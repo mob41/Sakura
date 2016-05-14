@@ -1,5 +1,11 @@
 package com.mob41.sakura.plugin;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * An API to port plugins into Sakura system
  * @author Anthony
@@ -7,6 +13,7 @@ package com.mob41.sakura.plugin;
  */
 public abstract class Plugin extends Events{
 	
+	private static final String workingDir = System.getProperty("user.dir");
 
 	/**
 	 * The Unique ID of this plugin
@@ -39,6 +46,40 @@ public abstract class Plugin extends Events{
 	 * It is called when this plugin is being ended.<br>
 	 */
 	public abstract void onEndPlugin();
+	
+	/**
+	 * Get the <code>FileOutputStream</code> from the <code>pluginData/{pluginName}/{fileName}</code>
+	 * @param fileName The filename to write into plugin data save
+	 * @return <code>FileOutputStream</code>, to write raw to it
+	 * @throws IOException If I/O goes wrong
+	 */
+	public final FileOutputStream getDataFileOutputStream(String fileName) throws IOException{
+		File file = new File(workingDir + "\\pluginData\\" + pluginDesc.getName() + "\\" + fileName);
+		if (!file.exists()){
+			file.mkdirs();
+			file.createNewFile();
+		}
+		
+		return new FileOutputStream(file);
+	}
+	
+	/**
+	 * Get the <code>FileInputStream</code> from the <code>pluginData/{pluginName}/{fileName}</code><br>
+	 * <br>
+	 * It will return <code>null</code> if the file is not readable/does not exist.
+	 * @param fileName The filename to read from the plugin data
+	 * @return <code>FileInputStream</code>, to read raw from it
+	 * @throws IOException If I/O goes wrong
+	 */
+	public final FileInputStream getDataFileInputStream(String fileName) throws IOException{
+		File file = new File(workingDir + "\\pluginData\\" + pluginDesc.getName() + "\\" + fileName);
+		
+		if (!file.exists()){
+			return null;
+		}
+		
+		return new FileInputStream(file);
+	}
 	
 	
 }
