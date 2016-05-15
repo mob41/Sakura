@@ -61,11 +61,13 @@ public class ApiServlet extends HttpServlet {
 		
 		boolean doActions = true;
 		
-		Disconnection dc = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
-		if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT)){
-			return;
-		} else if (dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
-			doActions = false;
+		JSONObject responseData = PluginManager.getPluginManager().callAll_ClientConnectAPI(request, response);
+		if (responseData != null && !responseData.isNull("dis")){
+			if (responseData.getString("dis").equals("immediate_disconnect")){
+				return;
+			} else if (responseData.getString("dis").equals("skip_to_encryption")){
+				doActions = false;
+			}
 		}
 		
 		JSONObject json = new JSONObject();
@@ -134,7 +136,6 @@ public class ApiServlet extends HttpServlet {
 		}
 		String iv = request.getParameter("iv");
 		
-		JSONObject responseData = new JSONObject(); 
 		if (doActions){
 
 			//Read action
@@ -159,12 +160,16 @@ public class ApiServlet extends HttpServlet {
 				
 				boolean accessPlugins = true;
 				
-				dc = PluginManager.getPluginManager().callAll_AccessPlugins(request, response);
-				if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT)){
-					return;
-				} else if (dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
-					accessPlugins = false;;
+				responseData = PluginManager.getPluginManager().callAll_AccessPlugins(request, response);
+				if (responseData != null && !responseData.isNull("dis")){
+					if (responseData.getString("dis").equals("immediate_disconnect")){
+						return;
+					} else if (responseData.getString("dis").equals("skip_to_encryption")){
+						accessPlugins = false;
+					}
 				}
+				
+				System.out.println(responseData);
 				
 				if (accessPlugins){
 					String pluginUid = request.getParameter("name");

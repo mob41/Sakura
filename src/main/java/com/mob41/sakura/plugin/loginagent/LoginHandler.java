@@ -52,12 +52,19 @@ public class LoginHandler {
 		}
 		
 		users.add(user);
+		try {
+			writeFile();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 		return true;
 	}
 	
 	protected boolean removeUser(int index){
 		try {
 			users.remove(index);
+			writeFile();
 			return true;
 		} catch (Exception e){
 			return false;
@@ -127,13 +134,28 @@ public class LoginHandler {
 		in.close();
 	}
 	
-	protected void createFile() throws IOException{
+	protected void writeFile() throws IOException{
 		FileOutputStream out = plug.getDataFileOutputStream(DATA_FILE_NAME);
 		Properties prop = new Properties();
-		prop.setProperty("users", Integer.toString(0));
+		prop.setProperty("users", Integer.toString(users.size()));
+		String key;
+		User user;
+		for (int i = 0; i < users.size(); i++){
+			key = "user" + i;
+			user = users.get(i);
+			prop.setProperty(key + "-usr", user.getUsername());
+			prop.setProperty(key + "-hash", user.getPassHash());
+			prop.setProperty(key + "-salt", user.getSalt());
+		}
 		prop.store(out, "SakuraSys Save");
 		out.flush();
 		out.close();
+		out.flush();
+		out.close();
+	}
+	
+	public void createFile(){
+		addUser("admin", "admin");
 	}
 	
 }

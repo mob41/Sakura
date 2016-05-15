@@ -5,6 +5,8 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.json.JSONObject;
+
 /**
  * <code>Events</code> class to control events in plugins<br>
  * <br>
@@ -13,15 +15,15 @@ import javax.servlet.http.HttpServletResponse;
  *
  */
 public abstract class Events {
-
+	
 	/**
 	 * This will be called whenever the API is connected to a client.<br>
 	 * Override this method to function
 	 * 
 	 * @return Return whether the connection should be alive
 	 */
-	public Disconnection onClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		return Disconnection.CONTINUE;
+	public JSONObject onClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return null;
 	};
 	
 	/**
@@ -30,9 +32,7 @@ public abstract class Events {
 	 * <br>
 	 * It is not allowed to kill connection after the API is disconnected.
 	 */
-	public Disconnection onClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		return Disconnection.CONTINUE;
-	};
+	public void onClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException {};
 	
 	/**
 	 * This will be called whenever the client is trying to access plugins.<br>
@@ -42,8 +42,8 @@ public abstract class Events {
 	 * 
 	 * @return Return whether the connection should be alive
 	 */
-	public Disconnection onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		return Disconnection.CONTINUE;
+	public JSONObject onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		return null;
 	};
 	
 	/**
@@ -53,4 +53,16 @@ public abstract class Events {
 	 * It is not allowed to kill connection after accessing plugin.
 	 */
 	public void onAfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException {};
+
+	public static void setImmediateDisconnect(JSONObject json){
+		json.put("dis", "immediate_disconnect");
+	}
+	
+	public static void setSkipToEncryption(JSONObject json){
+		json.put("dis", "skip_to_encryption");
+	}
+	
+	public static void setContinue(JSONObject json){
+		json.put("dis", "continue");
+	}
 }

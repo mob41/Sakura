@@ -106,16 +106,18 @@ public class PluginManager {
 
 //Events call all
 	
-	public Disconnection callAll_AccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		Disconnection dc = Disconnection.CONTINUE;
+	public JSONObject callAll_AccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONObject returns = null;
 		for (int i = 0; i < plugins.size(); i++){
-			dc = plugins.get(i).onAccessPlugins(request, response);
-			if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT) || 
-					dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
-				break;
+			returns = plugins.get(i).onAccessPlugins(request, response);
+			if (returns != null && !returns.isNull("dis")){
+				if (returns.getString("dis").equals("skip_to_encryption") ||
+						returns.getString("dis").equals("immediate_disconnect")){
+					break;
+				}
 			}
 		}
-		return dc;
+		return returns;
 	}
 	
 	public void callAll_AfterAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
@@ -124,16 +126,18 @@ public class PluginManager {
 		}
 	}
 
-	public Disconnection callAll_ClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException{
-		Disconnection dc = Disconnection.CONTINUE;
+	public JSONObject callAll_ClientConnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException{
+		JSONObject returns = null;
 		for (int i = 0; i < plugins.size(); i++){
-			dc = plugins.get(i).onClientConnectAPI(request, response);
-			if (dc.equals(Disconnection.IMMEDIATE_DISCONNECT) || 
-					dc.equals(Disconnection.SKIP_TO_ENCRYPTION)){
-				break;
+			returns = plugins.get(i).onClientConnectAPI(request, response);
+			if (returns != null && !returns.isNull("dis")){
+				if (returns.getString("dis").equals("skip_to_encryption") ||
+						returns.getString("dis").equals("immediate_disconnect")){
+					break;
+				}
 			}
 		}
-		return dc;
+		return returns;
 	}
 	
 	public void callAll_ClientDisconnectAPI(HttpServletRequest request, HttpServletResponse response) throws IOException{

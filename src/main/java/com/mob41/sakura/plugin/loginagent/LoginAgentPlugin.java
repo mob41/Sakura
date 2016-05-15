@@ -58,7 +58,7 @@ public class LoginAgentPlugin extends Plugin{
 	}
 	
 	@Override
-	public Disconnection onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
+	public JSONObject onAccessPlugins(HttpServletRequest request, HttpServletResponse response) throws IOException{
 		JSONObject json = new JSONObject();
 		json.put("generated", Calendar.getInstance().getTimeInMillis());
 		
@@ -69,8 +69,10 @@ public class LoginAgentPlugin extends Plugin{
 				json.put("code", "must-not-blank");
 				json.put("response", "Must not be blank");
 				json.put("status", -1);
+				
+				setImmediateDisconnect(json);
 				response.getWriter().println(json);
-				return Disconnection.IMMEDIATE_DISCONNECT;
+				return json;
 			}
 			
 			boolean auth = loginHandler.authenticate(username, password);
@@ -78,26 +80,32 @@ public class LoginAgentPlugin extends Plugin{
 			if (auth){
 				User user = loginHandler.getUserByUsername(username);
 				String sessionkey = sessionHandler.newSession(user, InetAddress.getByName(request.getRemoteAddr()));
+				System.out.println("sessionkey: " + sessionkey);
 				if (sessionkey == null){
+					System.out.println("Same IP USER");
 					json.put("code", "same-ip-user");
 					json.put("response", "Could not register session on same IP or user");
 					json.put("status", -1);
+					setImmediateDisconnect(json);
 					response.getWriter().println(json);
-					return Disconnection.IMMEDIATE_DISCONNECT;
+					return json;
 				}
-				
+				System.out.println("Success");
 				json.put("sessionkey", sessionkey);
 				json.put("code", "login-success");
 				json.put("response", "Logged in successfully");
 				json.put("status", 1);
-				response.getWriter().println(json);
-				return Disconnection.SKIP_TO_ENCRYPTION;
+				
+				System.out.println(json);
+				setSkipToEncryption(json);
+				return json;
 			} else {
 				json.put("code", "login-failed");
 				json.put("response", "Wrong password or user does not exist");
 				json.put("status", -1);
 				response.getWriter().println(json);
-				return Disconnection.SKIP_TO_ENCRYPTION;
+				setImmediateDisconnect(json);
+				return json;
 			}
 		}
 		
@@ -108,8 +116,9 @@ public class LoginAgentPlugin extends Plugin{
 			json.put("code", "no-session-key");
 			json.put("response", "No session key is specified");
 			System.err.println("No session key specified");
+			setImmediateDisconnect(json);
 			response.getWriter().println(json);
-			return Disconnection.IMMEDIATE_DISCONNECT;
+			return json;
 		}
 		
 		if (!sessionHandler.isSessionValid(sessionkey)){
@@ -117,19 +126,20 @@ public class LoginAgentPlugin extends Plugin{
 			json.put("code", "invalid-session-key");
 			json.put("response", "Session key is invalid");
 			System.err.println("Session key is invalid");
+			setImmediateDisconnect(json);
 			response.getWriter().println(json);
-			return Disconnection.IMMEDIATE_DISCONNECT;
+			return json;
 		}
 		
 		System.out.println("LoginAgentPlugin: Access granted from " + request.getRemoteAddr());
 
-		return Disconnection.CONTINUE;
+		return null;
 		
 	}
 	
 	@Override
-	public Disconnection onClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
-		return Disconnection.CONTINUE;
+	public JSONObject onClientConnectAPI(HttpServletRequest request, HttpServletResponse response){
+		return null;
 	}
 
 }
