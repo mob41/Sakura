@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONObject;
 
-import com.mob41.sakura.plugin.Disconnection;
 import com.mob41.sakura.plugin.Plugin;
 import com.mob41.sakura.plugin.PluginDescription;
 

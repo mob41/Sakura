@@ -2,7 +2,6 @@ package com.mob41.sakura.servlets;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,20 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.mob41.sakura.Conf;
-import com.mob41.sakura.hash.AES;
 import com.mob41.sakura.hash.AesUtil;
-import com.mob41.sakura.plugin.Disconnection;
 import com.mob41.sakura.plugin.PluginManager;
 import com.mob41.sakura.plugin.exception.NoSuchPluginException;
-import com.mob41.sakura.remo.BLRemote;
-import com.mob41.sakura.remo.RMBridgeAPI;
-import com.mob41.sakura.scene.SceneSave;
-import com.mob41.sakura.scene.SceneThread;
 
 @WebServlet("/api")
 public class ApiServlet extends HttpServlet {
