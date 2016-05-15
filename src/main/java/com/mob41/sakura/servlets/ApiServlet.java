@@ -220,7 +220,7 @@ public class ApiServlet extends HttpServlet {
 	private static JSONObject mergeJSON(JSONObject Obj1, JSONObject Obj2){
 		System.out.println("obj1: " + Obj1);
 		System.out.println("Obj2: " + Obj2);
-		if (JSONObject.getNames(Obj1) == null){
+		if (Obj1 == null){
 			return Obj2;
 		} else if (Obj2 == null){
 			return Obj1;
