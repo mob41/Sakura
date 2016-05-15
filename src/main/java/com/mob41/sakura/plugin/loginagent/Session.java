@@ -94,7 +94,7 @@ public class Session {
 		
 		endcal.add(Calendar.MILLISECOND, timeout);
 		
-		return !(cal.before(endcal) && cal.after(regcal));
+		return cal.before(endcal) && cal.after(regcal);
 	}
 	
 	/**

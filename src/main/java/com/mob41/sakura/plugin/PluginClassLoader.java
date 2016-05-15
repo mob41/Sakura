@@ -1,6 +1,7 @@
 package com.mob41.sakura.plugin;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -32,12 +33,14 @@ public class PluginClassLoader extends URLClassLoader {
             } catch (ClassCastException ex) {
                 throw new InvalidPluginException("main class `" + desc.getMainClass() + "' does not extend Plugin", ex);
             }
-            plugin = pluginClass.newInstance();
+            plugin = pluginClass.getDeclaredConstructor(PluginDescription.class).newInstance(desc);
         } catch (IllegalAccessException ex) {
             throw new InvalidPluginException("No public constructor", ex);
         } catch (InstantiationException ex) {
             throw new InvalidPluginException("Abnormal plugin type", ex);
-        }
+		} catch (Exception ex) {
+			throw new InvalidPluginException("Error", ex);
+		}
 	}
 	
 	/**

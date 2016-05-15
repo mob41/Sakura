@@ -120,7 +120,10 @@ public class LoginAgentPlugin extends Plugin{
 			return json;
 		}
 		
+		System.out.println(sessionkey);
+		System.out.println(sessionHandler.isSessionExist(sessionkey));
 		if (!sessionHandler.isSessionValid(sessionkey)){
+			System.out.println(sessionHandler.isSessionExist(sessionkey));
 			json.put("status", -1);
 			json.put("code", "invalid-session-key");
 			json.put("response", "Session key is invalid");
