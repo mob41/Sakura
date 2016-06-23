@@ -93,5 +93,4 @@ public abstract class Plugin extends Events{
 		return new FileInputStream(file);
 	}
 	
-	
 }

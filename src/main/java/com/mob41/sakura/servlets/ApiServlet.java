@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.mob41.sakura.hash.AesUtil;
@@ -58,6 +59,10 @@ public class ApiServlet extends HttpServlet {
 			} else if (responseData.getString("dis").equals("skip_to_encryption")){
 				doActions = false;
 			}
+		}
+		
+		if (responseData == null){
+			responseData = new JSONObject();
 		}
 		
 		JSONObject json = new JSONObject();
@@ -159,14 +164,32 @@ public class ApiServlet extends HttpServlet {
 					}
 				}
 				
+				if (responseData == null){
+					responseData = new JSONObject();
+				}
+				
 				System.out.println(responseData);
 				
 				if (accessPlugins){
 					String pluginUid = request.getParameter("name");
-					System.out.println("plugin: " + request.getParameter("plugin"));
-					JSONObject revData = new JSONObject(request.getParameter("plugin"));
-					System.out.println("plugJSON: " + revData);
+					String pluginAttrib = request.getParameter("plugin");
 					
+					if (pluginUid == null || pluginAttrib == null){
+						responseData.put("response", "Not enough parameters to access plugins");
+						responseData.put("code", "invalid-parameters");
+						responseData.put("status", -1);
+						break;
+					}
+					
+					JSONObject revData = null;
+					try {
+						revData = new JSONObject(pluginAttrib);
+					} catch (JSONException e){
+						responseData.put("response", "Malformed JSON request to plugin");
+						responseData.put("code", "malformed-json");
+						responseData.put("status", -1);
+						break;
+					}
 					
 					PluginManager.getPluginManager().callAll_AfterAccessPlugins(request, response);
 					
@@ -220,9 +243,9 @@ public class ApiServlet extends HttpServlet {
 	private static JSONObject mergeJSON(JSONObject Obj1, JSONObject Obj2){
 		System.out.println("obj1: " + Obj1);
 		System.out.println("Obj2: " + Obj2);
-		if (Obj1 == null){
+		if (Obj1 == null || JSONObject.getNames(Obj1) == null){
 			return Obj2;
-		} else if (Obj2 == null){
+		} else if (Obj2 == null || JSONObject.getNames(Obj2) == null){
 			return Obj1;
 		}
 		JSONObject merged = new JSONObject(Obj1, JSONObject.getNames(Obj1));
