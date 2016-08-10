@@ -5,6 +5,13 @@
   <version>0.0.1-SNAPSHOT</version>
   <name>Sakura</name>
   <description>Home Automation System</description>
+  <repositories>
+  		<repository>
+  			<id>jWebSocket-Repo</id>
+  			<name>jWebSocket Repository</name>
+  			<url>http://mvn.jwebsocket.org/</url>
+  		</repository>
+  </repositories>
   <dependencies>
   	<dependency>
   		<groupId>org.eclipse.jetty</groupId>
