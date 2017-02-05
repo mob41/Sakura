@@ -12,7 +12,12 @@ import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 public class ToastMessage extends JDialog {
-    int miliseconds;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 5587701132660852055L;
+	
+	int miliseconds;
     public ToastMessage(String toastString, int time) {
         this.miliseconds = time;
         setUndecorated(true);

@@ -15,27 +15,12 @@ public class AES_SHA512 {
 	private static final String ALGO2 = "SHA-512";
     private static byte[] keyValue = new byte[16];
     
-    private static String getExchangeKey(){
-    	Random rand = new Random();
-    	byte[] key = new byte[16];
-    	rand.nextBytes(key);
-    	return Base64.encodeBase64String(key);
-    }
-    
     public static String getRandomSalt(){
     	Random rand = new Random();
     	byte[] key = new byte[16];
     	rand.nextBytes(key);
     	return Base64.encodeBase64String(key);
     }
-    
-    private static String getRandom(int amount){
-    	Random rand = new Random();
-    	byte[] key = new byte[amount];
-    	rand.nextBytes(key);
-    	return Base64.encodeBase64String(key);
-    }
-    
     
     private static byte[] decode(String buffer) throws Exception {
     	return Base64.decodeBase64(buffer);

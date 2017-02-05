@@ -31,9 +31,7 @@ public class PermUser {
 		JSONArray userNodes = userJson.getJSONArray("perms");
 		selfNodes = new PermNode[userNodes.length()];
 		
-		System.out.println("Self nodes: " + userNodes.length() + " nodes");
 		for (int i = 0; i < selfNodes.length; i++){
-			System.out.println("(" + i + ") per: " + userNodes.getString(i));
 			selfNodes[i] = new PermNode(userNodes.getString(i));
 		}
 	}
@@ -62,36 +60,25 @@ public class PermUser {
 	
 	public boolean isPermitted(PermNode permNode){
 		if (permNode == null){
-			System.out.println("False permnode null");
 			return false;
 		}
 		
 		boolean gpPer = false;
-		System.out.println("Checking assocGroups total " + assocGroups.length);
 		for (int i = 0; i < assocGroups.length; i++){
-			System.out.println("Checking permmit: " + assocGroups[i].getName());
 			gpPer = assocGroups[i].isPermitted(permNode);
 		}
-		System.out.println("GpPer: " + gpPer);
-		System.out.println("End asscoGroup check");
 		
 		boolean selfPer = isSelfPermitted(permNode);
-		
-		System.out.println("SelfPer: " + selfPer);
 		
 		return selfPer || gpPer;
 	}
 	
 	public boolean isSelfNodeExist(PermNode permNode){
-		System.out.println("Searching: " + permNode);
 		for (int i = 0; i < selfNodes.length; i++){
-			System.out.println(selfNodes[i].getAlias());
 			if (permNode.equals(selfNodes[i])){
-				System.out.println("True");
 				return true;
 			}
 		}
-		System.out.println("Not found");
 		return false;
 	}
 	

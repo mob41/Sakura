@@ -1,7 +1,5 @@
 package com.github.mob41.sakura.security;
 
-import java.util.List;
-
 import com.github.mob41.sakura.hash.AES_SHA512;
 
 /**

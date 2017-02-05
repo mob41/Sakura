@@ -2,13 +2,13 @@ package com.github.mob41.sakura.plugin;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import com.github.mob41.sakura.action.Action;
+import com.github.mob41.sakura.action.ActionResponse;
+import com.github.mob41.sakura.api.SakuraServer;
 
 /**
  * An API to port plugins into Sakura system
@@ -19,11 +19,11 @@ public abstract class Plugin{
 	
 	private static final String _workingDir = System.getProperty("user.dir");
 	
-	private List<Action> _pluginActions;
+	private final SakuraServer _srv;
 	
-	public Plugin(PluginDescription pluginDesc){
+	public Plugin(PluginDescription pluginDesc, SakuraServer srv){
 		this.pluginDesc = pluginDesc;
-		_pluginActions = new ArrayList<Action>(50);
+		this._srv = srv;
 	}
 
 	/**
@@ -43,24 +43,30 @@ public abstract class Plugin{
 	 * @return a array of <code>PluginAction</code> instances
 	 */
 	public Action[] getActions(){
-		if (_pluginActions == null){
+		List<Action> actions = _srv.getActionManager().getPluginActions(pluginDesc.getName());
+		
+		if (actions == null){
 			return null;
 		}
-		Action[] arr = new Action[_pluginActions.size()];
+		
+		Action[] arr = new Action[actions.size()];
 		for (int i = 0; i < arr.length; i++){
-			arr[i] = _pluginActions.get(i);
+			arr[i] = actions.get(i);
 		}
+		
 		return arr;
 	}
 	
-	public PluginResponse runAction(int index, Object... args){
-		if (_pluginActions == null){
-			return PluginResponse.getNotImplementedResponse();
-		} else if (_pluginActions.size() < index || index < 0){
-			return PluginResponse.getNotImplementedResponse();
+	public abstract void unload();
+	
+	public ActionResponse runAction(int index, Object... args){
+		Action[] actions = getActions();
+		
+		if (actions == null || actions.length < index || index < 0){
+			return null;
 		}
 		
-		return _pluginActions.get(index).run(args);
+		return actions[index].run(args);
 	}
 	
 	public void setParameter(int index, Object value){
@@ -75,12 +81,29 @@ public abstract class Plugin{
 		return null;
 	}
 	
-	public final boolean addAction(Action pluginAction){
-		return _pluginActions.add(pluginAction);
+	public final boolean registerAction(Action pluginAction){
+		return _srv.getActionManager().registerAction(pluginDesc, pluginAction);
 	}
 	
-	public final void removeAction(int index){
-		_pluginActions.remove(index);
+	public final boolean unregisterAction(int index){
+		return _srv.getActionManager().unregisterAction(pluginDesc, index);
+	}
+	
+	public final PluginDescription getPluginDescription(){
+		return pluginDesc;
+	}
+	
+	public final String getUID(){
+		return pluginUid;
+	}
+	
+	
+	/**
+	 * Returns the currently running Sakura Server instance.
+	 * @return SakuraServer instance
+	 */
+	public final SakuraServer getServer(){
+		return _srv;
 	}
 	
 	/**
@@ -133,7 +156,6 @@ public abstract class Plugin{
 	 * @throws IOException If I/O goes wrong
 	 */
 	public final FileInputStream getDataFileInputStream(String fileName) throws IOException{
-		System.out.println(pluginDesc.getRawJSON());
 		File file = new File(_workingDir + "/pluginData/" + pluginDesc.getName() + "/" + fileName);
 		
 		if (!file.exists()){

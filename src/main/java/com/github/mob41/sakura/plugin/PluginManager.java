@@ -10,21 +10,18 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.json.JSONObject;
 
+import com.github.mob41.sakura.action.ActionResponse;
+import com.github.mob41.sakura.api.SakuraServer;
+import com.github.mob41.sakura.exception.InvalidPluginDescription;
+import com.github.mob41.sakura.exception.InvalidPluginException;
+import com.github.mob41.sakura.exception.NoSuchPluginException;
 import com.github.mob41.sakura.hash.AES;
-import com.github.mob41.sakura.plugin.exception.InvalidPluginDescription;
-import com.github.mob41.sakura.plugin.exception.InvalidPluginException;
-import com.github.mob41.sakura.plugin.exception.NoSuchPluginException;
 
 public class PluginManager {
 	
-	private static final String pluginFolderPath = System.getProperty("user.dir") + "\\plugins";
-	
-	private static final PluginManager pluginManager = new PluginManager();
+	private static final String pluginFolderPath = System.getProperty("user.dir") + "/plugins";
 	
 	/**
 	 * The default maximum plugins amount
@@ -35,14 +32,18 @@ public class PluginManager {
 	 * List of plugins
 	 */
 	private List<Plugin> plugins;
+	
+	private SakuraServer srv;
 
 	/**
 	 * Create a new <code>PluginManager</code> instance.<br>
 	 * <br>
 	 * It stores instances of <code>Plugin</code> or its inherits.
+	 * @param srv A existing SakuraServer instance
 	 */
-	public PluginManager(){
+	public PluginManager(SakuraServer srv){
 		plugins = new ArrayList<Plugin>(MAX_PLUGINS);
+		this.srv = srv;
 	}
 	
 	/**
@@ -53,7 +54,7 @@ public class PluginManager {
 	 * @return The action status and response in a <code>PluginResponse</code> instance.
 	 * @throws NoSuchPluginException It is thrown if the <code>pluginName</code> specified is not loaded/invalid
 	 */
-	public PluginResponse runAction(String pluginName, int actionIndex, Object... args) throws NoSuchPluginException{
+	public ActionResponse runAction(String pluginName, int actionIndex, Object... args) throws NoSuchPluginException{
 		Plugin plugin = getPlugin(pluginName);
 		if (plugin == null){
 			return null;
@@ -73,6 +74,14 @@ public class PluginManager {
 			throw new NoSuchPluginException("The plugin \"" + pluginName + "\" wasn't loaded/found");
 		}
 		return plugins.get(index);
+	}
+	
+	/**
+	 * Returns loaded plugins.
+	 * @return a <code>List</b> of loaded plugins
+	 */
+	public List<Plugin> getPlugins(){
+		return plugins;
 	}
 	
 	/**
@@ -98,14 +107,6 @@ public class PluginManager {
 			}
 		}
 		return -1;
-	}
-	
-	/**
-	 * Returns the currently running plugin manager.
-	 * @return PluginManager
-	 */
-	public static PluginManager getPluginManager(){
-		return pluginManager;
 	}
 	
 	public void loadAllPlugins() throws InvalidPluginException{
@@ -150,7 +151,7 @@ public class PluginManager {
 
         final PluginClassLoader loader;
         try {
-            loader = new PluginClassLoader(description, PluginManager.class.getClassLoader(), file);
+            loader = new PluginClassLoader(srv, description, PluginManager.class.getClassLoader(), file);
         } catch (InvalidPluginException ex) {
             throw ex;
         } catch (Throwable ex) {
@@ -159,7 +160,15 @@ public class PluginManager {
 
         addPlugin(loader.getPlugin(), description);
         
-        return loader.getPlugin();
+        Plugin plugin = loader.getPlugin();
+        
+        try {
+			loader.close();
+		} catch (IOException e) {
+			throw new InvalidPluginException("Error when closing loader.", e);
+		}
+        
+        return plugin;
     }
 	
 	public PluginDescription getPluginDescription(File file) throws InvalidPluginDescription {

@@ -52,7 +52,7 @@ public class TimeFormatting {
 		String month = mon < 10 ? "0" + mon  : Integer.toString(mon);
 		String year = yr < 10 ? "0" + yr  : Integer.toString(yr);
 		
-		String hour = hr < 10 ? "0" + hr : Integer.toString(hr);
+		//String hour = hr < 10 ? "0" + hr : Integer.toString(hr);
 		String minute = min < 10 ? "0" + min : Integer.toString(min);
 		String second = sec < 10 ? "0" + sec : Integer.toString(sec);
 		

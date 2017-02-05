@@ -4,36 +4,27 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.swing.table.DefaultTableModel;
-
-import org.json.JSONObject;
-
+import com.github.mob41.sakura.api.SakuraServer;
 import com.github.mob41.sakura.hash.AES_SHA512;
-import com.github.mob41.sakura.plugin.Plugin;
 
-public class UserMgr {
+public class UserManager {
 	
 	private static final String DATA_FILE_NAME = "users.upf";
 	
 	private final List<User> users;
 	
-	private static final SessionHandler sessionHandler = new SessionHandler(30);
-	
-	private static final UserMgr userMgr = new UserMgr(30);
-	
 	public static final int STATUS_NO_PERMISSION = 0;
 	
 	public static final int STATUS_INVALID_USER_PWD = 1;
 	
-	public UserMgr(int maxusers){
+	private final SakuraServer srv;
+	
+	public UserManager(SakuraServer srv, int maxusers){
+		this.srv = srv;
 		users = new ArrayList<User>(maxusers);
 		try {
 			loadFile();
@@ -42,14 +33,6 @@ public class UserMgr {
 			e.printStackTrace();
 			System.exit(-1);
 		}
-	}
-	
-	public static UserMgr getInstance(){
-		return userMgr;
-	}
-	
-	public static SessionHandler getSessionHandler(){
-		return sessionHandler;
 	}
 	
 	public boolean authenticate(String username, String password){
@@ -108,7 +91,7 @@ public class UserMgr {
 		return getUserIndex(user) != -1;
 	}
 	
-	protected boolean isUsernameExist(String username){
+	public boolean isUsernameExist(String username){
 		return getUsernameIndex(username) != -1;
 	}
 	
@@ -197,6 +180,16 @@ public class UserMgr {
 	
 	public void createFile(){
 		addUser("admin", "admin");
+		PermManager perm = srv.getPermManager();
+		perm.allowUser("admin", "system.alerts.dismiss");
+		perm.allowUser("admin", "system.control");
+		perm.allowUser("admin", "system.admin");
+		try {
+			perm.writeFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }

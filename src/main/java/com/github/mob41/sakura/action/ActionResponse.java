@@ -1,6 +1,6 @@
-package com.github.mob41.sakura.plugin;
+package com.github.mob41.sakura.action;
 
-public class PluginResponse {
+public class ActionResponse {
 	
 	public static final int STATUS_NOT_IMPLEMENTED = -3;
 	
@@ -20,15 +20,15 @@ public class PluginResponse {
 	
 	private final String message;
 	
-	public PluginResponse(){
+	public ActionResponse(){
 		this(STATUS_NO_RESPONSE, null);
 	}
 	
-	public PluginResponse(int status){
+	public ActionResponse(int status){
 		this(status, null);
 	}
 	
-	public PluginResponse(int status, String message){
+	public ActionResponse(int status, String message){
 		this.status = status;
 		this.message = message;
 	}
@@ -69,11 +69,11 @@ public class PluginResponse {
 		return message;
 	}
 	
-	public static PluginResponse getDefaultResponse(){
-		return new PluginResponse();
+	public static ActionResponse getDefaultResponse(){
+		return new ActionResponse();
 	}
 	
-	public static PluginResponse getNotImplementedResponse(){
-		return new PluginResponse(STATUS_NO_RESPONSE);
+	public static ActionResponse getNotImplementedResponse(){
+		return new ActionResponse(STATUS_NO_RESPONSE);
 	}
 }

@@ -1,12 +1,16 @@
 package com.github.mob41.sakura;
 
-import com.github.mob41.sakura.security.PermManager;
+import java.util.Calendar;
+
+import com.github.mob41.sakura.api.SakuraServer;
+import com.github.mob41.sakura.dynamic.DynamicHandler;
+import com.github.mob41.sakura.dynamic.DynamicManager;
 
 public class Main {
-
+	
 	public static void main(String[] args) throws Exception {
-		PermManager m = new PermManager();
-		m.addPerm("aa", "abcdef");
+		SakuraServer srv = new SakuraServer(80);
+		srv.startWebServer();
 	}
 
 }

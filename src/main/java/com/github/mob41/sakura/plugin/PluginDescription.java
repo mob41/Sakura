@@ -3,7 +3,7 @@ package com.github.mob41.sakura.plugin;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.github.mob41.sakura.plugin.exception.InvalidPluginDescription;
+import com.github.mob41.sakura.exception.InvalidPluginDescription;
 
 public class PluginDescription{
 	

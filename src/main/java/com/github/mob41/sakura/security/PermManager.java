@@ -14,21 +14,17 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.github.mob41.sakura.api.SakuraServer;
+
 public class PermManager {
 	
 	private static final String DATA_FILE_NAME = "perms.json";
 	
 	private static final String DEFAULT_GROUP_NAME = "default";
 	
-	private static PermManager instance = new PermManager();
-	
 	private JSONObject perms;
-	
-	public static final PermManager getInstance(){
-		return instance;
-	}
 
-	public PermManager(){
+	public PermManager(SakuraServer srv){
 		try {
 			loadFile();
 		} catch (IOException e) {
@@ -46,7 +42,6 @@ public class PermManager {
 	}
 	
 	public void createUser(String username, String defgp){
-		System.out.println("Generating user");
 		JSONObject userJson = new JSONObject();
 		userJson.put("groups", new JSONArray().put(defgp));
 		userJson.put("perms", new JSONArray());
@@ -61,7 +56,6 @@ public class PermManager {
 	}
 	
 	public void createGroup(String groupName, PermNode[] nodes){
-		System.out.println("Generating group");
 		JSONObject groupJson = new JSONObject();
 		JSONArray nodesArr = new JSONArray();
 		
@@ -84,10 +78,8 @@ public class PermManager {
 	
 	public void allowUser(String username, String alias){
 		JSONObject usersJson = perms.getJSONObject("users");
-		System.out.println("Allowing user...: " + username + " for " + alias);
 		
 		if (usersJson.isNull(username)){
-			System.out.println("Null. Creating");
 			String defgp = getDefaultGroup();
 			if (defgp == null){
 				return;
@@ -98,25 +90,20 @@ public class PermManager {
 			if (perms.getJSONObject("groups").isNull(defgp)){
 				createGroup(defgp, null);
 			}
-			System.out.println("Create end");
 		}
 		
 		JSONObject userJson = usersJson.getJSONObject(username);
 		
 		int index = -1;
 		JSONArray userPerms = userJson.getJSONArray("perms");
-		System.out.println("Searching perm exist, total " + userPerms.length() + " nodes");
 		for (int i = 0; i < userPerms.length(); i++){
-			System.out.println("Perm: " + userPerms.getString(i));
 			if (userPerms.getString(i).equals(alias)){
-				System.out.println("Found. Not going to add perm");
 				index = i;
 				break;
 			}
 		}
 		
 		if (index == -1){
-			System.out.println("Not exist.");
 			userPerms.put(alias);
 		}
 		
@@ -167,15 +154,12 @@ public class PermManager {
 	}
 	
 	public boolean isUserPermitted(String username, String alias){
-		System.out.println("Checking perm: " + username + " of " + alias);
 		JSONObject usersJson = perms.getJSONObject("users");
 		
 		//Create a new user and hook to the default group if not exist
 		if (usersJson.isNull(username)){
-			System.out.println("User is null. to default group check");
 			String defgp = getDefaultGroup();
 			if (defgp == null){
-				System.out.println("DEfault group is null. return false");
 				return false;
 			}
 			
@@ -185,17 +169,16 @@ public class PermManager {
 				createGroup(defgp, null);
 			}
 			
-			System.out.println("Return as group check");
 			return isGroupPermitted(defgp, alias);
 		}
 		
-		System.out.println("Creating perm user");
-		
 		PermUser permUser = new PermUser(perms, username);
 		
-		System.out.println("Checking perms");
-		
 		return permUser.isPermitted(alias);
+	}
+	
+	public PermUser getUser(String username){
+		return new PermUser(perms, username);
 	}
 	
 	public boolean isGroupPermitted(String groupName, String alias){
@@ -317,10 +300,8 @@ public class PermManager {
 		}
 	}
 	
-	protected void writeFile() throws IOException{
-		System.out.println("Writing file... " + DATA_FILE_NAME);
+	public void writeFile() throws IOException{
 		File file = new File(DATA_FILE_NAME);
-		System.out.println("Path: " + file.getAbsolutePath());
 		
 		if (!file.exists() || perms == null){
 			perms = new JSONObject();
@@ -334,10 +315,9 @@ public class PermManager {
 		writer.println(perms.toString(5));
 		writer.close();
 		
-		System.out.println("Write success");
 	}
 	
-	protected void createFile() throws IOException{
+	public void createFile() throws IOException{
 		writeFile();
 	}
 }

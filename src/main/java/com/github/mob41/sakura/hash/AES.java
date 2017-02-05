@@ -1,18 +1,12 @@
 package com.github.mob41.sakura.hash;
 
-import java.security.AlgorithmParameters;
 import java.security.Key;
-import java.security.spec.KeySpec;
 import java.util.Random;
 
-import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import javax.crypto.*;
+import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.apache.commons.codec.binary.Base64;
-
-import sun.misc.*;
 
 public class AES {
 	

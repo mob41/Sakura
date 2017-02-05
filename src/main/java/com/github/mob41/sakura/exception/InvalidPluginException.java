@@ -1,4 +1,4 @@
-package com.github.mob41.sakura.plugin.exception;
+package com.github.mob41.sakura.exception;
 
 /**
  * It is thrown when the plugin was invalid.

@@ -14,7 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.github.mob41.sakura.hash.AesUtil;
-import com.github.mob41.sakura.security.UserMgr;
+import com.github.mob41.sakura.security.UserManager;
 
 public class APIServlet extends HttpServlet {
 	
@@ -67,7 +67,7 @@ public class APIServlet extends HttpServlet {
 				return;
 			}
 			
-			boolean auth = UserMgr.getInstance().authenticate(user, pass);
+			boolean auth = false;
 			
 			if (auth){
 				String _auth_randiv = AesUtil.random(128/8);

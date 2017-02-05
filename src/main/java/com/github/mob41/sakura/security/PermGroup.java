@@ -11,7 +11,6 @@ public class PermGroup {
 	
 	public PermGroup(JSONObject perms, String groupName){
 		if (groupName == null || groupName.isEmpty() || perms == null || perms.getJSONObject("groups").isNull(groupName)){
-			System.out.println("No such group");
 			this.permNodes = null;
 			this.groupName = null;
 			return;
